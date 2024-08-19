@@ -1,0 +1,219 @@
+/* src/screens/LandingPage.css */
+.landing-container {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    scroll-behavior: smooth;
+  }
+  
+  /* Hero Section */
+  .landing-header {
+    position: relative;
+    color: white;
+    padding: 100px 20px;
+    font-family: 'Ubuntu', sans-serif;
+    animation: fadeIn 2s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 87, 34, 0.7); /* Add a warm color overlay */
+    z-index: 0;
+  }
+  
+  .landing-header h1,
+  .landing-header p,
+  .cta-button {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeInText 1.5s ease-in-out 0.5s forwards;
+  }
+  
+  @keyframes fadeInText {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .cta-button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    color: white;
+    background-color: #388e3c;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .cta-button:hover {
+    background-color: #2e7d32;
+    transform: scale(1.05);
+  }
+  
+  /* Features Section */
+  .features-section {
+    margin: 50px 0;
+    opacity: 0;
+    animation: fadeIn 2s ease-in-out 1s forwards;
+  }
+  
+  .features-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #d84315;
+  }
+  
+  .features-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+  
+  .feature-item {
+    background-color: #ffeb3b;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .feature-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .feature-icon {
+    color: #388e3c;
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .feature-item:hover .feature-icon {
+    color: #2e7d32;
+    transform: scale(1.2);
+  }
+  
+  .feature-item h3 {
+    font-size: 1.5rem;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #d84315;
+  }
+  
+  .feature-item p {
+    font-size: 1rem;
+    color: #6d4c41;
+  }
+  
+  /* How It Works Section */
+  .how-it-works-section {
+    background-color: #f4f4f4;
+    padding: 50px 0;
+  }
+  
+  .how-it-works-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #d84315;
+  }
+  
+  .how-it-works-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+  
+  .how-it-works-item {
+    background-color: #fff59d;
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+  
+  .how-it-works-item:hover {
+    transform: translateY(-10px);
+  }
+  
+  .how-it-works-icon {
+    color: #388e3c;
+  }
+  
+  /* Testimonials Section */
+  .testimonials-section {
+    padding: 50px 0;
+    background-color: #ffffff;
+  }
+  
+  .testimonials-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #d84315;
+  }
+  
+  .testimonials-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+  
+  .testimonial-item {
+    background-color: #ffeb3b;
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-style: italic;
+    color: #6d4c41;
+  }
+  
+  .testimonial-item span {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
+  /* Footer Section */
+  .landing-footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    background-color: #3e2723;
+    color: white;
+  }
+  
+  .social-media-links {
+    margin-bottom: 10px;
+  }
+  
+  .social-media-links a {
+    margin: 0 10px;
+    color: white;
+    transition: color 0.3s ease;
+  }
+  
+  .social-media-links a:hover {
+    color: #ffeb3b;
+  }
+  
