@@ -1,0 +1,134 @@
+/* src/screens/LandingPage.css */
+.landing-container {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    scroll-behavior: smooth; /* Enables smooth scrolling */
+  }
+  
+  .landing-header {
+    position: relative;
+    color: white;
+    padding: 100px 20px;
+    font-family: 'Ubuntu', sans-serif;
+    animation: fadeIn 2s ease-in-out; /* Fade-in animation */
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 87, 34, 0.7); /* Warm color overlay */
+    z-index: 0;
+  }
+  
+  .landing-header h1,
+  .landing-header p,
+  .cta-button {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeInText 1.5s ease-in-out 0.5s forwards; /* Text fades in after background */
+  }
+  
+  @keyframes fadeInText {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .cta-button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    color: white;
+    background-color: #388e3c;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Transition for hover effect */
+  }
+  
+  .cta-button:hover {
+    background-color: #2e7d32;
+    transform: scale(1.05); /* Scale button on hover */
+  }
+  
+  .features-section {
+    margin: 50px 0;
+    opacity: 0;
+    animation: fadeIn 2s ease-in-out 1s forwards; /* Fade-in effect for features */
+  }
+  
+  .features-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #d84315;
+  }
+  
+  .features-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+  
+  .feature-item {
+    background-color: #ffeb3b;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transition for hover effect */
+  }
+  
+  .feature-item:hover {
+    transform: translateY(-10px); /* Lift card on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+  }
+  
+  .feature-icon {
+    color: #388e3c;
+    transition: color 0.3s ease, transform 0.3s ease; /* Transition for icon hover */
+  }
+  
+  .feature-item:hover .feature-icon {
+    color: #2e7d32;
+    transform: scale(1.2); /* Scale icon on hover */
+  }
+  
+  .feature-item h3 {
+    font-size: 1.5rem;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #d84315;
+  }
+  
+  .feature-item p {
+    font-size: 1rem;
+    color: #6d4c41;
+  }
+  
+  .landing-footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    background-color: #3e2723;
+    color: white;
+    animation: fadeIn 2s ease-in-out 1.5s forwards; /* Fade-in effect for footer */
+  }
+  
