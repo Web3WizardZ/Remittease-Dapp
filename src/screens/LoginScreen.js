@@ -1,30 +1,24 @@
+// src/screens/LoginScreen.js
 import React, { useState } from 'react';
+import WalletConnectButton from '../components/WalletConnectButton';
 
 const LoginScreen = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [connectedAccount, setConnectedAccount] = useState(null);
 
-  const handleLogin = () => {
-    
-    console.log('Logging in:', username);
+  const handleConnect = (account) => {
+    setConnectedAccount(account);
+    // Use the connected account in your application logic
+    console.log("Connected account:", account);
   };
 
   return (
     <div>
       <h2>Login</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin}>Login</button>
+      {connectedAccount ? (
+        <p>Welcome, {connectedAccount}</p>
+      ) : (
+        <WalletConnectButton onConnect={handleConnect} />
+      )}
     </div>
   );
 };
