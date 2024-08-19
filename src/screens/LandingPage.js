@@ -1,7 +1,7 @@
 // src/screens/LandingPage.js
 import React from 'react';
-import './LandingPage.css';
 import Navbar from '../components/Navbar';
+import './LandingPage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBolt, faLock, faMoneyBillWave, faUserCheck, faHandshake, faSmile } from '@fortawesome/free-solid-svg-icons';
 import { faFacebook, faTwitter, faInstagram } from '@fortawesome/free-brands-svg-icons';
@@ -9,23 +9,21 @@ import { faFacebook, faTwitter, faInstagram } from '@fortawesome/free-brands-svg
 const LandingPage = () => {
   return (
     <div className="landing-container">
-      <Navbar /> {/* Add Navbar */}
+      <Navbar /> {/* Navigation Bar */}
       
-      <header
-        className="landing-header"
-        id="hero"
-        style={{
-          backgroundImage: `url('/kids.png')`, // Replace with video background if needed
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
+      {/* Hero Section with Video Background */}
+      <header className="landing-header" id="hero">
+        <video autoPlay muted loop className="video-background">
+          <source src="/background.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         <div className="overlay"></div>
         <h1>Welcome to the African Remittance Platform</h1>
         <p>Fast, Secure, and Affordable Cross-Border Transfers</p>
         <button className="cta-button">Get Started</button>
       </header>
       
+      {/* Features Section */}
       <section className="features-section" id="features">
         <h2>Features</h2>
         <div className="features-grid">
@@ -47,6 +45,7 @@ const LandingPage = () => {
         </div>
       </section>
       
+      {/* How It Works Section */}
       <section className="how-it-works-section" id="how-it-works">
         <h2>How It Works</h2>
         <div className="how-it-works-grid">
@@ -68,6 +67,7 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
       <section className="testimonials-section" id="testimonials">
         <h2>What Our Users Say</h2>
         <div className="testimonials-grid">
@@ -86,6 +86,7 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Footer Section */}
       <footer className="landing-footer">
         <div className="social-media-links">
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
@@ -98,6 +99,10 @@ const LandingPage = () => {
             <FontAwesomeIcon icon={faInstagram} size="2x" />
           </a>
         </div>
+        <form className="newsletter-signup">
+          <input type="email" placeholder="Enter your email" required />
+          <button type="submit">Subscribe</button>
+        </form>
         <p>© 2024 African Remittance Platform. All rights reserved.</p>
       </footer>
     </div>
