@@ -14,12 +14,13 @@ body {
   
   .video-background {
     position: absolute;
-    top: -750px; /* Adjust this value to move the video up */
+    top: -500;
     left: 0;
-    height: 110%; /* Adjust this value to cover more of the screen */
+    height: 30%; /* Adjusted to cover 60% of the screen */
     width: 100%;
     object-fit: cover;
-    z-index: -5;
+    z-index: -1;
+    transition: height 0.5s ease; /* Add smooth scaling effect */
   }
   
   .overlay {
@@ -28,15 +29,16 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5); /* Adjust overlay color for contrast */
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7)); /* Gradient overlay for better contrast */
     z-index: 0;
   }
   
   .landing-header {
     position: relative;
     color: white;
-    padding: 120px 20px 60px; /* Adjust padding to control the position of text */
+    padding: 100px 20px 50px; /* Adjust padding to control the position of text */
     z-index: 1;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); /* Subtle text shadow for readability */
   }
   
   .cta-button {
@@ -55,29 +57,127 @@ body {
     transform: scale(1.05);
   }
   
-  /* Additional styles for sections */
-  .features-section,
-  .how-it-works-section,
-  .testimonials-section,
-  .landing-footer {
+  /* Features Section */
+  .features-section {
     position: relative;
     padding: 50px 20px;
-    background-color: #fff; /* Background color for visibility */
+    background-color: #f4f4f4; /* Light background for better visibility */
     z-index: 1;
   }
   
-  .features-section h2,
-  .how-it-works-section h2,
-  .testimonials-section h2 {
-    font-size: 2.2rem;
-    margin-bottom: 30px;
-    color: #d84315;
+  .feature-item {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .feature-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* How It Works Section */
+  .how-it-works-section {
+    position: relative;
+    padding: 50px 20px;
+    background-color: #fff;
+    z-index: 1;
+  }
+  
+  .how-it-works-item {
+    background-color: #fff59d; /* Highlight the items with a soft yellow background */
+    padding: 20px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+  }
+  
+  .how-it-works-item:hover {
+    transform: translateY(-10px);
+  }
+  
+  /* Testimonials Section */
+  .testimonials-section {
+    position: relative;
+    padding: 50px 20px;
+    background-color: #ffeb3b;
+    z-index: 1;
+  }
+  
+  .testimonial-item {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-style: italic;
+    color: #6d4c41;
+  }
+  
+  .testimonial-item:hover {
+    transform: translateY(-10px);
+  }
+  
+  /* Footer Section */
+  .landing-footer {
+    position: relative;
+    padding: 20px 0;
+    background-color: #3e2723;
+    color: white;
+    z-index: 1;
+  }
+  
+  .social-media-links a {
+    margin: 0 10px;
+    color: white;
+    transition: color 0.3s ease;
+  }
+  
+  .social-media-links a:hover {
+    color: #ffeb3b;
+  }
+  
+  /* Newsletter Sign-Up Form */
+  .newsletter-signup {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  
+  .newsletter-signup input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+    width: 250px;
+  }
+  
+  .newsletter-signup button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #388e3c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .newsletter-signup button:hover {
+    background-color: #2e7d32;
   }
   
   /* Responsive Design */
   @media (max-width: 768px) {
+    .video-background {
+      height: 40%; /* Adjust video height for smaller screens */
+    }
+  
     .cta-button {
       width: 80%;
+    }
+  
+    .feature-item, .how-it-works-item, .testimonial-item {
+      margin-bottom: 20px;
     }
   }
   

@@ -18,7 +18,7 @@ const LandingPage = () => {
       <Navbar /> {/* Navigation Bar */}
       
       <header className="landing-header" id="hero">
-        <h1>Welcome to the African Remittance Platform</h1>
+        <h1>RemittEase</h1>
         <p>Fast, Secure, and Affordable Cross-Border Transfers</p>
         <button className="cta-button">Get Started</button>
       </header>

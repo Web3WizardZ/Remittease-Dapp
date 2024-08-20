@@ -1,0 +1,19 @@
+.page-container {
+    text-align: center;
+    padding: 50px 20px;
+  }
+  
+  .page-header {
+    background-color: #388e3c;
+    color: white;
+    padding: 30px 0;
+    margin-bottom: 20px;
+  }
+  
+  .page-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  

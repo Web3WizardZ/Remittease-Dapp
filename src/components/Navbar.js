@@ -1,32 +1,16 @@
-// src/components/Navbar.js
 import React from 'react';
-import { Link } from 'react-scroll';
+import { Link } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
   return (
     <nav className="navbar">
       <ul>
-        <li>
-          <Link to="hero" smooth={true} duration={1000}>
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link to="features" smooth={true} duration={1000}>
-            Features
-          </Link>
-        </li>
-        <li>
-          <Link to="how-it-works" smooth={true} duration={1000}>
-            How It Works
-          </Link>
-        </li>
-        <li>
-          <Link to="testimonials" smooth={true} duration={1000}>
-            Testimonials
-          </Link>
-        </li>
+        <li><Link to="/">Home</Link></li>
+        <li><Link to="/about">About</Link></li>
+        <li><Link to="/services">Services</Link></li>
+        <li><Link to="/faq">FAQ</Link></li>
+        <li><Link to="/contact">Contact</Link></li>
       </ul>
     </nav>
   );
