@@ -6,16 +6,31 @@
   }
   
   .page-header {
-    background: linear-gradient(135deg, #388e3c 0%, #4caf50 100%); /* Gradient header */
+    background: linear-gradient(135deg, #388e3c 0%, #4caf50 100%);
     color: white;
     padding: 60px 20px;
     margin-bottom: 40px;
     border-radius: 8px;
+    position: relative;
+    overflow: hidden;
   }
   
   .page-header h1 {
     font-size: 2.5rem;
     margin: 0;
+    animation: fadeInDown 1s ease-in-out;
+  }
+  
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+    animation: rotateBackground 10s linear infinite;
+    z-index: 0;
   }
   
   .page-content {
@@ -26,6 +41,8 @@
     max-width: 900px;
     margin: 0 auto;
     text-align: left;
+    position: relative;
+    z-index: 1;
   }
   
   /* Typography */
@@ -54,6 +71,16 @@
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+    animation: fadeInUp 0.8s ease-in-out;
+  }
+  
+  .page-content ul li::before {
+    content: '\f00c'; /* Check icon */
+    font-family: FontAwesome;
+    position: absolute;
+    left: 15px;
+    color: #388e3c;
   }
   
   /* Buttons */
@@ -66,6 +93,7 @@
     border-radius: 25px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
+    animation: fadeInUp 1s ease-in-out;
   }
   
   .cta-button:hover {
@@ -101,10 +129,18 @@
     border-radius: 8px;
     font-size: 1rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    border-color: #388e3c;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
   .contact-form button {
     align-self: flex-start;
+    animation: fadeInUp 1.2s ease-in-out;
   }
   
   /* Testimonials Section */
@@ -116,6 +152,12 @@
     font-style: italic;
     color: #6d4c41;
     margin-bottom: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .testimonial-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
   }
   
   .testimonial-item span {
@@ -123,6 +165,38 @@
     margin-top: 10px;
     font-weight: bold;
     color: #388e3c;
+  }
+  
+  /* Animations */
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes rotateBackground {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
   
   /* Media Queries for Responsiveness */

@@ -11,7 +11,7 @@ const Services = () => {
       </header>
       <section className="page-content">
         <p>
-          The African Remittance Platform offers a range of services designed to make sending and receiving money across borders easier, faster, and more secure. Here’s what we offer:
+          RemittEase offers a range of services designed to make sending and receiving money across borders easier, faster, and more secure. Here’s what we offer:
         </p>
         <h2>Fast and Secure Cross-Border Transfers</h2>
         <p>

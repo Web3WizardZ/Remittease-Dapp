@@ -11,7 +11,7 @@ const About = () => {
       </header>
       <section className="page-content">
         <p>
-          At the African Remittance Platform, we believe that everyone deserves access to affordable and secure money transfers, no matter where they are. Our platform is designed to help the African diaspora send money home quickly, securely, and with minimal fees.
+          At RemittEase, we believe that everyone deserves access to affordable and secure money transfers, no matter where they are. Our platform is designed to help the African diaspora send money home quickly, securely, and with minimal fees.
         </p>
         <h2>Our Mission</h2>
         <p>

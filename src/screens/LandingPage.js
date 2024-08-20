@@ -1,5 +1,6 @@
-// src/screens/LandingPage.js
-import React from 'react';
+import React, { useState } from 'react';
+import { ethers } from 'ethers';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import './LandingPage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,6 +8,32 @@ import { faBolt, faLock, faMoneyBillWave, faUserCheck, faHandshake, faSmile } fr
 import { faFacebook, faTwitter, faInstagram } from '@fortawesome/free-brands-svg-icons';
 
 const LandingPage = () => {
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState('');
+  const navigate = useNavigate();
+
+  const connectWallet = async () => {
+    try {
+      if (window.ethereum) {
+        // Request account access if needed
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send('eth_requestAccounts', []);
+        const address = accounts[0];
+        
+        // Set wallet state
+        setWalletConnected(true);
+        setWalletAddress(address);
+
+        // Redirect to the functional page
+        navigate('/functional-page'); // Replace with your actual functional page route
+      } else {
+        alert('Please install MetaMask!');
+      }
+    } catch (error) {
+      console.error('Wallet connection failed:', error);
+    }
+  };
+
   return (
     <div className="landing-container">
       <video autoPlay muted loop className="video-background">
@@ -20,7 +47,11 @@ const LandingPage = () => {
       <header className="landing-header" id="hero">
         <h1>RemittEase</h1>
         <p>Fast, Secure, and Affordable Cross-Border Transfers</p>
-        <button className="cta-button">Get Started</button>
+
+        {/* Get Started Button as Wallet Connection Button */}
+        <button className="cta-button" onClick={connectWallet}>
+          {walletConnected ? `Connected: ${walletAddress.slice(0, 6)}...` : 'Get Started'}
+        </button>
       </header>
       
       {/* Features Section */}

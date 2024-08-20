@@ -5,6 +5,7 @@ import About from './screens/About';
 import Services from './screens/Services';
 import FAQ from './screens/FAQ';
 import Contact from './screens/Contact';
+import FunctionalPage from './screens/FunctionalPage'; // Import the new Functional Page
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/functional-page" element={<FunctionalPage />} /> {/* Add the new route */}
       </Routes>
     </Router>
   );
