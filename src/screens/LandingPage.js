@@ -9,15 +9,15 @@ import { faFacebook, faTwitter, faInstagram } from '@fortawesome/free-brands-svg
 const LandingPage = () => {
   return (
     <div className="landing-container">
+      <video autoPlay muted loop className="video-background">
+        <source src="/background.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <div className="overlay"></div>
+
       <Navbar /> {/* Navigation Bar */}
       
-      {/* Hero Section with Video Background */}
       <header className="landing-header" id="hero">
-        <video autoPlay muted loop className="video-background">
-          <source src="/background.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-        <div className="overlay"></div>
         <h1>Welcome to the African Remittance Platform</h1>
         <p>Fast, Secure, and Affordable Cross-Border Transfers</p>
         <button className="cta-button">Get Started</button>
