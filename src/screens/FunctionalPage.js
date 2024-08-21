@@ -9,21 +9,20 @@ const FunctionalPage = () => {
   const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('');
+  const [depositAddress, setDepositAddress] = useState('');
+  const [cryptoDepositStatus, setCryptoDepositStatus] = useState('');
 
   useEffect(() => {
-    // Fetch wallet balance and transaction history
     const fetchWalletDetails = async () => {
       if (window.ethereum) {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
 
-        // Fetch balance using provider and address
         const balance = await provider.getBalance(address);
         setBalance(ethers.formatEther(balance));
 
-        // Fetch recent transactions (you will need to implement this based on your blockchain API)
-        // setTransactions(mockTransactionData);
+        // Fetch recent transactions (to be implemented with a blockchain API)
       }
     };
 
@@ -46,16 +45,21 @@ const FunctionalPage = () => {
       });
 
       setStatus(`Transaction successful! TX Hash: ${tx.hash}`);
-      
-      // Fetch updated balance after the transaction
+
       const address = await signer.getAddress();
       const balance = await provider.getBalance(address);
       setBalance(ethers.formatEther(balance));
-      
     } catch (error) {
       console.error('Transaction failed:', error);
       setStatus('Transaction failed. Please try again.');
     }
+  };
+
+  const generateDepositAddress = () => {
+    // Generate or retrieve a unique deposit address for the user
+    const address = '0xYourGeneratedDepositAddress'; // Replace with actual logic
+    setDepositAddress(address);
+    setCryptoDepositStatus('Deposit address generated successfully!');
   };
 
   return (
@@ -68,6 +72,32 @@ const FunctionalPage = () => {
       <section className="wallet-overview">
         <h2>Wallet Balance</h2>
         <p>{balance} ETH</p>
+      </section>
+
+      <section className="deposit-section">
+        <h2>Deposit Funds</h2>
+
+        {/* Crypto Deposit */}
+        <div className="deposit-option">
+          <h3>Deposit with Crypto</h3>
+          <button onClick={generateDepositAddress}>Get Deposit Address</button>
+          {depositAddress && <p>Your deposit address: {depositAddress}</p>}
+          <p>{cryptoDepositStatus}</p>
+        </div>
+
+        {/* Fiat Deposit */}
+        <div className="deposit-option">
+          <h3>Deposit with Fiat</h3>
+          {/* Placeholder for fiat deposit integration */}
+          <p>Integrate with a payment processor like Stripe or PayPal.</p>
+        </div>
+
+        {/* Debit/Credit Card Deposit */}
+        <div className="deposit-option">
+          <h3>Deposit with Debit/Credit Card</h3>
+          {/* Placeholder for card deposit integration */}
+          <p>Integrate with a payment gateway for card payments.</p>
+        </div>
       </section>
 
       <section className="send-money-section">
