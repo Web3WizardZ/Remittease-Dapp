@@ -1,76 +1,295 @@
 import React, { useState } from 'react';
-import { ethers } from 'ethers';  // Correct import for ethers
-import { AlphaRouter, SwapType } from '@uniswap/smart-order-router';
-import { Percent, CurrencyAmount } from '@uniswap/sdk-core';
-import ERC20ABI from '../abis/ERC20ABI.json';
+import { ethers } from 'ethers';
+import { Fetcher, Trade, Route, TokenAmount, TradeType } from '@uniswap/sdk';
+import { parseUnits } from '@ethersproject/units';
+
+// Uniswap V2 Router address on Ethereum mainnet
+const UniswapV2Router02Address = '0x7a250d5630b4cf539739df2c5dacabdb9caa73a3';
 
 const SwapComponent = () => {
   const [inputAmount, setInputAmount] = useState('');
   const [outputAmount, setOutputAmount] = useState('');
   const [status, setStatus] = useState('');
 
-  const UniswapV2Router02Address = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"; // Uniswap Router address on Ethereum Mainnet
-
   const handleSwap = async () => {
     try {
-      if (!window.ethereum) {
-        setStatus('Please connect to a wallet.');
-        return;
-      }
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-      // Initialize provider and signer
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send('eth_requestAccounts', []);  // Request wallet connection
-      const signer = provider.getSigner();
+      const tokenInAddress = '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe'; // Replace with actual token address
+      const tokenOutAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // Replace with actual token address
 
-      if (!signer) {
-        setStatus('Signer not found. Please connect your wallet.');
-        return;
-      }
+      // Fetch token data
+      const tokenIn = await Fetcher.fetchTokenData(1, tokenInAddress, provider); // Chain ID 1 is Ethereum mainnet
+      const tokenOut = await Fetcher.fetchTokenData(1, tokenOutAddress, provider);
 
-      const tokenInAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'; // USDC
-      const tokenOutAddress = '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'; // USDT
+      const pair = await Fetcher.fetchPairData(tokenIn, tokenOut, provider);
+      const route = new Route([pair], tokenIn);
 
-      const tokenInContract = new ethers.Contract(tokenInAddress, ERC20ABI, signer);
-      const amountIn = ethers.utils.parseUnits(inputAmount, 6);
+      const trade = new Trade(route, new TokenAmount(tokenIn, parseUnits(inputAmount, tokenIn.decimals)), TradeType.EXACT_INPUT);
 
-      // Approve token
-      const approval = await tokenInContract.approve(UniswapV2Router02Address, amountIn);
-      await approval.wait();
-
-      const router = new AlphaRouter({ chainId: 1, provider });
-
-      // Get swap route
-      const route = await router.route(
-        CurrencyAmount.fromRawAmount(tokenInAddress, amountIn.toString()),
-        tokenOutAddress,
-        SwapType.SWAP_ROUTER_02,
-        {
-          recipient: await signer.getAddress(),
-          slippageTolerance: new Percent(50, 10000),
-          deadline: Math.floor(Date.now() / 1000) + 60 * 20,
-        }
+      // Generate swap call data
+      const swapCallData = await generateSwapCallData(
+        inputAmount,
+        outputAmount,
+        [tokenInAddress, tokenOutAddress],
+        await signer.getAddress(),
+        Math.floor(Date.now() / 1000) + 60 * 20,
+        provider // Pass provider here
       );
 
-      if (!route || !route.methodParameters) {
-        setStatus('Failed to get route.');
-        return;
-      }
+      // Approve the token
+      const approval = await signer.approve(tokenInAddress, trade.inputAmount.raw.toString());
+      await approval.wait();
 
-      // Execute swap transaction
+      // Execute the swap
       const tx = await signer.sendTransaction({
-        to: UniswapV2Router02Address,
-        data: route.methodParameters.calldata,
-        value: route.methodParameters.value,
-        gasLimit: ethers.BigNumber.from(300000),
+        to: UniswapV2Router02Address, // Uniswap router address
+        data: swapCallData, // Encoded swap transaction data
       });
       await tx.wait();
 
       setStatus('Swap successful!');
     } catch (error) {
       console.error('Swap failed:', error);
-      setStatus(`Swap failed: ${error.message}`);
+      setStatus('Swap failed. Please try again.');
     }
+  };
+
+  const generateSwapCallData = async (amountIn, amountOutMin, path, to, deadline, provider) => {
+    const UniswapV2Router02ABI = [
+        [
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "name",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_spender",
+                        "type": "address"
+                    },
+                    {
+                        "name": "_value",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "approve",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "totalSupply",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_from",
+                        "type": "address"
+                    },
+                    {
+                        "name": "_to",
+                        "type": "address"
+                    },
+                    {
+                        "name": "_value",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "transferFrom",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "decimals",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint8"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "_owner",
+                        "type": "address"
+                    }
+                ],
+                "name": "balanceOf",
+                "outputs": [
+                    {
+                        "name": "balance",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "symbol",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_to",
+                        "type": "address"
+                    },
+                    {
+                        "name": "_value",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "transfer",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "_owner",
+                        "type": "address"
+                    },
+                    {
+                        "name": "_spender",
+                        "type": "address"
+                    }
+                ],
+                "name": "allowance",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "payable": true,
+                "stateMutability": "payable",
+                "type": "fallback"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "name": "spender",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "value",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "Approval",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "name": "from",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "name": "to",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "value",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "Transfer",
+                "type": "event"
+            }
+        ]
+    ];
+    const contract = new ethers.Contract(UniswapV2Router02Address, UniswapV2Router02ABI, provider);
+    const swapCallData = await contract.populateTransaction.swapExactTokensForTokens(
+      parseUnits(amountIn, 18),
+      parseUnits(amountOutMin, 18),
+      path,
+      to,
+      deadline
+    );
+    return swapCallData.data;
   };
 
   return (
@@ -78,13 +297,13 @@ const SwapComponent = () => {
       <h2>Swap Tokens</h2>
       <input
         type="text"
-        placeholder="Input Amount USDC"
+        placeholder="Input Amount"
         value={inputAmount}
         onChange={(e) => setInputAmount(e.target.value)}
       />
       <input
         type="text"
-        placeholder="Output Amount USDT"
+        placeholder="Output Amount"
         value={outputAmount}
         onChange={(e) => setOutputAmount(e.target.value)}
         disabled
