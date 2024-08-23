@@ -15,7 +15,7 @@ const SwapComponent = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
 
-      const tokenInAddress = '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8'; // USDC.e
+      const tokenInAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'; // USDC
       const tokenOutAddress = '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe'; // ETH
 
       // Fetch token data
