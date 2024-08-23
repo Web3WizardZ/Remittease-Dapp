@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { Fetcher, Trade, Route, TokenAmount, TradeType, Percent, Router } from '@uniswap/sdk';
-import { parseUnits, hexlify } from 'ethers'; // Import hexlify and parseUnits directly
+import { parseUnits, hexlify } from 'ethers'; // Directly import the required utilities
 
 const SwapComponent = () => {
   const [inputAmount, setInputAmount] = useState('');
@@ -12,8 +12,19 @@ const SwapComponent = () => {
 
   const handleSwap = async () => {
     try {
+      if (!window.ethereum) {
+        setStatus('Please connect to a wallet.');
+        return;
+      }
+
+      // Initialize provider and signer
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
+      
+      // Ensure the signer is valid
+      if (!signer || !signer.getAddress) {
+        throw new Error('Signer is invalid');
+      }
 
       const tokenInAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'; // USDC
       const tokenOutAddress = '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'; // USDT
