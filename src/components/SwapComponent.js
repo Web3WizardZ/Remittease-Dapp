@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ethers } from 'ethers';
+import { ethers } from 'ethers';  // Correct import for ethers
 import { AlphaRouter, SwapType } from '@uniswap/smart-order-router';
 import { Percent, CurrencyAmount } from '@uniswap/sdk-core';
 import ERC20ABI from '../abis/ERC20ABI.json';
@@ -8,26 +8,25 @@ const SwapComponent = () => {
   const [inputAmount, setInputAmount] = useState('');
   const [outputAmount, setOutputAmount] = useState('');
   const [status, setStatus] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-  const UniswapV2Router02Address = process.env.REACT_APP_UNISWAP_ROUTER_ADDRESS;
+  const UniswapV2Router02Address = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"; // Uniswap Router address on Ethereum Mainnet
 
   const handleSwap = async () => {
-    if (!inputAmount || isNaN(parseFloat(inputAmount))) {
-      setStatus('Please enter a valid input amount.');
-      return;
-    }
-
-    setIsLoading(true);
-    setStatus('Initiating swap...');
-
     try {
       if (!window.ethereum) {
-        throw new Error('Please connect to a wallet.');
+        setStatus('Please connect to a wallet.');
+        return;
       }
 
+      // Initialize provider and signer
       const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send('eth_requestAccounts', []);  // Request wallet connection
       const signer = provider.getSigner();
+
+      if (!signer) {
+        setStatus('Signer not found. Please connect your wallet.');
+        return;
+      }
 
       const tokenInAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'; // USDC
       const tokenOutAddress = '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'; // USDT
@@ -35,13 +34,13 @@ const SwapComponent = () => {
       const tokenInContract = new ethers.Contract(tokenInAddress, ERC20ABI, signer);
       const amountIn = ethers.utils.parseUnits(inputAmount, 6);
 
-      setStatus('Approving token spend...');
+      // Approve token
       const approval = await tokenInContract.approve(UniswapV2Router02Address, amountIn);
       await approval.wait();
 
-      setStatus('Finding best swap route...');
       const router = new AlphaRouter({ chainId: 1, provider });
 
+      // Get swap route
       const route = await router.route(
         CurrencyAmount.fromRawAmount(tokenInAddress, amountIn.toString()),
         tokenOutAddress,
@@ -54,27 +53,23 @@ const SwapComponent = () => {
       );
 
       if (!route || !route.methodParameters) {
-        throw new Error('Failed to get route.');
+        setStatus('Failed to get route.');
+        return;
       }
 
-      setStatus('Executing swap...');
+      // Execute swap transaction
       const tx = await signer.sendTransaction({
         to: UniswapV2Router02Address,
         data: route.methodParameters.calldata,
         value: route.methodParameters.value,
         gasLimit: ethers.BigNumber.from(300000),
       });
-      
-      setStatus('Waiting for transaction confirmation...');
-      const receipt = await tx.wait();
+      await tx.wait();
 
-      setOutputAmount(ethers.utils.formatUnits(route.quote.toFixed(), 6));
-      setStatus(`Swap successful! Transaction hash: ${receipt.transactionHash}`);
+      setStatus('Swap successful!');
     } catch (error) {
       console.error('Swap failed:', error);
       setStatus(`Swap failed: ${error.message}`);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -86,17 +81,15 @@ const SwapComponent = () => {
         placeholder="Input Amount USDC"
         value={inputAmount}
         onChange={(e) => setInputAmount(e.target.value)}
-        disabled={isLoading}
       />
       <input
         type="text"
         placeholder="Output Amount USDT"
         value={outputAmount}
+        onChange={(e) => setOutputAmount(e.target.value)}
         disabled
       />
-      <button onClick={handleSwap} disabled={isLoading}>
-        {isLoading ? 'Swapping...' : 'Swap'}
-      </button>
+      <button onClick={handleSwap}>Swap</button>
       <p>{status}</p>
     </div>
   );
