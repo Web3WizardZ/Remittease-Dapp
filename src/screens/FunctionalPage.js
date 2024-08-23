@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Navbar from '../components/Navbar';
+import SwapComponent from '../components/SwapComponent'; // Swap feature component
 import './FunctionalPage.css';
 
 const FunctionalPage = () => {
@@ -66,11 +67,13 @@ const FunctionalPage = () => {
         <h1>Your Dashboard</h1>
       </header>
 
+      {/* Wallet Balance */}
       <section className="wallet-overview small-card neumorphism-effect">
         <h2>Wallet Balance</h2>
         <p className="balance">{balance} ETH</p>
       </section>
 
+      {/* Send Money */}
       <section className="send-money-section glass-effect">
         <h2>Send Money</h2>
         <div className="send-money-form">
@@ -93,11 +96,15 @@ const FunctionalPage = () => {
         <p className="status-message">{status}</p>
       </section>
 
+      {/* Swap Feature */}
+      <section className="swap-feature glass-effect">
+        <SwapComponent />
+      </section>
+
+      {/* Deposit Section */}
       <section className="deposit-section">
         <h2>Deposit Funds</h2>
-
         <div className="deposit-grid">
-          {/* Crypto Deposit */}
           <div className="deposit-option neumorphism-effect">
             <h3>Deposit with Crypto</h3>
             <button onClick={generateDepositAddress} className="cta-button">Get Deposit Address</button>
@@ -105,13 +112,11 @@ const FunctionalPage = () => {
             <p className="status-message">{cryptoDepositStatus}</p>
           </div>
 
-          {/* Fiat Deposit */}
           <div className="deposit-option neumorphism-effect">
             <h3>Deposit with Fiat</h3>
             <p>Coming Soon!</p>
           </div>
 
-          {/* Debit/Credit Card Deposit */}
           <div className="deposit-option neumorphism-effect">
             <h3>Deposit with Debit/Credit Card</h3>
             <p>Coming soon!</p>
@@ -119,6 +124,7 @@ const FunctionalPage = () => {
         </div>
       </section>
 
+      {/* Transaction History */}
       <section className="transaction-history-section">
         <h2>Transaction History</h2>
         {transactions.length > 0 ? (

@@ -159,4 +159,46 @@ body {
       transform: translateY(0);
     }
   }
+  /* SwapComponent Styles */
+.swap-container {
+  padding: 20px;
+  background-color: #f4f4f9;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.swap-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.swap-container input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.swap-container button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: white;
+  background-color: #3498db;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.swap-container button:hover {
+  background-color: #2980b9;
+}
+
+.swap-container p {
+  margin-top: 10px;
+  color: #e74c3c;
+  font-weight: bold;
+}
+
   
