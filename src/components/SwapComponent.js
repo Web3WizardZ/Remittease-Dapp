@@ -15,8 +15,8 @@ const SwapComponent = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
 
-      const tokenInAddress = '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8'; // Replace with actual token address
-      const tokenOutAddress = '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe'; // Replace with actual token address
+      const tokenInAddress = '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8'; // USDC.e
+      const tokenOutAddress = '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe'; // ETH
 
       // Fetch token data
       const tokenIn = await Fetcher.fetchTokenData(1, tokenInAddress, provider); // Chain ID 1 is Ethereum mainnet
@@ -64,13 +64,13 @@ const SwapComponent = () => {
       <h2>Swap Tokens</h2>
       <input
         type="text"
-        placeholder="Input Amount"
+        placeholder="Input Amount USDC.e"
         value={inputAmount}
         onChange={(e) => setInputAmount(e.target.value)}
       />
       <input
         type="text"
-        placeholder="Output Amount"
+        placeholder="Output Amount ETH"
         value={outputAmount}
         onChange={(e) => setOutputAmount(e.target.value)}
         disabled
