@@ -64,7 +64,7 @@ const SwapComponent = () => {
       <h2>Swap Tokens</h2>
       <input
         type="text"
-        placeholder="Input Amount USDC.e"
+        placeholder="Input Amount USDC"
         value={inputAmount}
         onChange={(e) => setInputAmount(e.target.value)}
       />
