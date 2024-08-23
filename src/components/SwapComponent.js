@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { Fetcher, Trade, Route, TokenAmount, TradeType, Percent, Router } from '@uniswap/sdk';
-import { parseUnits } from 'ethers'; // Directly import the required utility
+import { parseUnits, hexlify } from 'ethers'; // Import hexlify and parseUnits directly
 
 const SwapComponent = () => {
   const [inputAmount, setInputAmount] = useState('');
@@ -41,21 +41,25 @@ const SwapComponent = () => {
 
       const swapCallData = swapParameters.calldata;
 
-      // Approve the token for swap
-      const approval = await signer.approve(tokenInAddress, trade.inputAmount.raw.toString());
+      // Create a contract instance for tokenIn (USDC)
+      const tokenInContract = new ethers.Contract(tokenInAddress, ['function approve(address spender, uint256 amount)'], signer);
+
+      // Approve the Uniswap Router to spend the tokenIn (USDC)
+      const approval = await tokenInContract.approve(UniswapV2Router02Address, trade.inputAmount.raw.toString());
       await approval.wait();
 
       // Execute the swap transaction
       const tx = await signer.sendTransaction({
         to: UniswapV2Router02Address,
         data: swapCallData,
+        gasLimit: hexlify(300000), // Specify a gas limit for the swap
       });
       await tx.wait();
 
       setStatus('Swap successful!');
     } catch (error) {
       console.error('Swap failed:', error);
-      setStatus('Swap failed. Please try again.');
+      setStatus(`Swap failed: ${error.message}`);
     }
   };
 
