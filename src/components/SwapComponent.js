@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ethers } from 'ethers';  // Correct import for ethers
+import { ethers } from 'ethers';
 import { AlphaRouter, SwapType } from '@uniswap/smart-order-router';
 import { Percent, CurrencyAmount } from '@uniswap/sdk-core';
 import ERC20ABI from '../abis/ERC20ABI.json';
@@ -8,14 +8,22 @@ const SwapComponent = () => {
   const [inputAmount, setInputAmount] = useState('');
   const [outputAmount, setOutputAmount] = useState('');
   const [status, setStatus] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const UniswapV2Router02Address = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"; // Uniswap Router address on Ethereum Mainnet
+  const UniswapV2Router02Address = process.env.REACT_APP_UNISWAP_ROUTER_ADDRESS;
 
   const handleSwap = async () => {
+    if (!inputAmount || isNaN(parseFloat(inputAmount))) {
+      setStatus('Please enter a valid input amount.');
+      return;
+    }
+
+    setIsLoading(true);
+    setStatus('Initiating swap...');
+
     try {
       if (!window.ethereum) {
-        setStatus('Please connect to a wallet.');
-        return;
+        throw new Error('Please connect to a wallet.');
       }
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -27,9 +35,11 @@ const SwapComponent = () => {
       const tokenInContract = new ethers.Contract(tokenInAddress, ERC20ABI, signer);
       const amountIn = ethers.utils.parseUnits(inputAmount, 6);
 
+      setStatus('Approving token spend...');
       const approval = await tokenInContract.approve(UniswapV2Router02Address, amountIn);
       await approval.wait();
 
+      setStatus('Finding best swap route...');
       const router = new AlphaRouter({ chainId: 1, provider });
 
       const route = await router.route(
@@ -44,22 +54,27 @@ const SwapComponent = () => {
       );
 
       if (!route || !route.methodParameters) {
-        setStatus('Failed to get route.');
-        return;
+        throw new Error('Failed to get route.');
       }
 
+      setStatus('Executing swap...');
       const tx = await signer.sendTransaction({
         to: UniswapV2Router02Address,
         data: route.methodParameters.calldata,
         value: route.methodParameters.value,
         gasLimit: ethers.BigNumber.from(300000),
       });
-      await tx.wait();
+      
+      setStatus('Waiting for transaction confirmation...');
+      const receipt = await tx.wait();
 
-      setStatus('Swap successful!');
+      setOutputAmount(ethers.utils.formatUnits(route.quote.toFixed(), 6));
+      setStatus(`Swap successful! Transaction hash: ${receipt.transactionHash}`);
     } catch (error) {
       console.error('Swap failed:', error);
       setStatus(`Swap failed: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -71,15 +86,17 @@ const SwapComponent = () => {
         placeholder="Input Amount USDC"
         value={inputAmount}
         onChange={(e) => setInputAmount(e.target.value)}
+        disabled={isLoading}
       />
       <input
         type="text"
         placeholder="Output Amount USDT"
         value={outputAmount}
-        onChange={(e) => setOutputAmount(e.target.value)}
         disabled
       />
-      <button onClick={handleSwap}>Swap</button>
+      <button onClick={handleSwap} disabled={isLoading}>
+        {isLoading ? 'Swapping...' : 'Swap'}
+      </button>
       <p>{status}</p>
     </div>
   );
