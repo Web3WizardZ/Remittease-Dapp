@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
+import { providers, utils } from 'ethers'; // Updated import to directly access `providers` and `utils`
 import Navbar from '../components/Navbar';
 import SwapComponent from '../components/SwapComponent'; // Swap feature component
 import './FunctionalPage.css';
@@ -16,12 +16,12 @@ const FunctionalPage = () => {
   useEffect(() => {
     const fetchWalletDetails = async () => {
       if (window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
+        const provider = new providers.Web3Provider(window.ethereum); // Corrected provider
+        const signer = provider.getSigner();
         const address = await signer.getAddress();
 
         const balance = await provider.getBalance(address);
-        setBalance(ethers.formatEther(balance));
+        setBalance(utils.formatEther(balance)); // Corrected formatEther import
       }
     };
 
@@ -35,19 +35,19 @@ const FunctionalPage = () => {
     }
 
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      const provider = new providers.Web3Provider(window.ethereum); // Corrected provider
+      const signer = provider.getSigner();
 
       const tx = await signer.sendTransaction({
         to: recipientAddress,
-        value: ethers.parseEther(amount),
+        value: utils.parseEther(amount), // Corrected parseEther import
       });
 
       setStatus(`Transaction successful! TX Hash: ${tx.hash}`);
 
       const address = await signer.getAddress();
       const balance = await provider.getBalance(address);
-      setBalance(ethers.formatEther(balance));
+      setBalance(utils.formatEther(balance)); // Corrected formatEther import
     } catch (error) {
       console.error('Transaction failed:', error);
       setStatus('Transaction failed. Please try again.');
@@ -132,7 +132,7 @@ const FunctionalPage = () => {
             {transactions.map((tx, index) => (
               <li key={index} className="transaction-item glass-effect">
                 <p>TX Hash: {tx.hash}</p>
-                <p>Amount: {ethers.formatEther(tx.value)} ETH</p>
+                <p>Amount: {utils.formatEther(tx.value)} ETH</p> {/* Corrected formatEther usage */}
               </li>
             ))}
           </ul>

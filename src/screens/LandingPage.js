@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ethers } from 'ethers';
+import { providers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import './LandingPage.css';
@@ -15,11 +15,11 @@ const LandingPage = () => {
   const connectWallet = async () => {
     try {
       if (window.ethereum) {
-        // Request account access if needed
-        const provider = new ethers.BrowserProvider(window.ethereum);
+        // Request account access
+        const provider = new providers.Web3Provider(window.ethereum);
         const accounts = await provider.send('eth_requestAccounts', []);
         const address = accounts[0];
-        
+
         // Set wallet state
         setWalletConnected(true);
         setWalletAddress(address);

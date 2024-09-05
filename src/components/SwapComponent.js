@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
-import { Fetcher, Trade, Route, TokenAmount, TradeType } from '@uniswap/sdk';
+import { Fetcher, Trade, Route, TokenAmount, TradeType, WETH, Token } from '@uniswap/sdk';
 import { parseUnits } from '@ethersproject/units';
 
-// Uniswap V2 Router address on Ethereum mainnet
-const UniswapV2Router02Address = '0x7a250d5630b4cf539739df2c5dacabdb9caa73a3';
+const UniswapV2Router02Address = '0x7a250d5630b4cf539739df2c5dacabdb9caa73a3'; // Uniswap V2 Router address
 
 const SwapComponent = () => {
   const [inputAmount, setInputAmount] = useState('');
@@ -13,11 +12,18 @@ const SwapComponent = () => {
 
   const handleSwap = async () => {
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      if (!window.ethereum) {
+        setStatus('Please install MetaMask!');
+        return;
+      }
 
-      const tokenInAddress = '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe'; // Replace with actual token address
-      const tokenOutAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // Replace with actual token address
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const account = await signer.getAddress();
+
+      // Replace with actual token addresses
+      const tokenInAddress = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI (for example)
+      const tokenOutAddress = WETH[1].address; // WETH on Ethereum Mainnet
 
       // Fetch token data
       const tokenIn = await Fetcher.fetchTokenData(1, tokenInAddress, provider); // Chain ID 1 is Ethereum mainnet
@@ -26,25 +32,36 @@ const SwapComponent = () => {
       const pair = await Fetcher.fetchPairData(tokenIn, tokenOut, provider);
       const route = new Route([pair], tokenIn);
 
-      const trade = new Trade(route, new TokenAmount(tokenIn, parseUnits(inputAmount, tokenIn.decimals)), TradeType.EXACT_INPUT);
+      // Create a trade instance
+      const trade = new Trade(
+        route,
+        new TokenAmount(tokenIn, parseUnits(inputAmount, tokenIn.decimals)),
+        TradeType.EXACT_INPUT
+      );
+
+      // Calculate minimum output amount (slippage tolerance applied here if needed)
+      const amountOutMin = trade.minimumAmountOut(parseUnits('1', tokenOut.decimals)).raw.toString();
 
       // Generate swap call data
       const swapCallData = await generateSwapCallData(
         inputAmount,
-        outputAmount,
+        amountOutMin,
         [tokenInAddress, tokenOutAddress],
-        await signer.getAddress(),
+        account,
         Math.floor(Date.now() / 1000) + 60 * 20,
-        provider // Pass provider here
+        provider
       );
 
-      // Approve the token
-      const approval = await signer.approve(tokenInAddress, trade.inputAmount.raw.toString());
+      // Approve the token for spending
+      const tokenContract = new ethers.Contract(tokenInAddress, [
+        'function approve(address _spender, uint256 _value) public returns (bool)',
+      ], signer);
+      const approval = await tokenContract.approve(UniswapV2Router02Address, trade.inputAmount.raw.toString());
       await approval.wait();
 
-      // Execute the swap
+      // Execute the swap transaction
       const tx = await signer.sendTransaction({
-        to: UniswapV2Router02Address, // Uniswap router address
+        to: UniswapV2Router02Address,
         data: swapCallData, // Encoded swap transaction data
       });
       await tx.wait();
@@ -58,229 +75,9 @@ const SwapComponent = () => {
 
   const generateSwapCallData = async (amountIn, amountOutMin, path, to, deadline, provider) => {
     const UniswapV2Router02ABI = [
-        [
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "name",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "string"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": false,
-                "inputs": [
-                    {
-                        "name": "_spender",
-                        "type": "address"
-                    },
-                    {
-                        "name": "_value",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "approve",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "bool"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "totalSupply",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": false,
-                "inputs": [
-                    {
-                        "name": "_from",
-                        "type": "address"
-                    },
-                    {
-                        "name": "_to",
-                        "type": "address"
-                    },
-                    {
-                        "name": "_value",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "transferFrom",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "bool"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "decimals",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint8"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [
-                    {
-                        "name": "_owner",
-                        "type": "address"
-                    }
-                ],
-                "name": "balanceOf",
-                "outputs": [
-                    {
-                        "name": "balance",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "symbol",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "string"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": false,
-                "inputs": [
-                    {
-                        "name": "_to",
-                        "type": "address"
-                    },
-                    {
-                        "name": "_value",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "transfer",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "bool"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [
-                    {
-                        "name": "_owner",
-                        "type": "address"
-                    },
-                    {
-                        "name": "_spender",
-                        "type": "address"
-                    }
-                ],
-                "name": "allowance",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "payable": true,
-                "stateMutability": "payable",
-                "type": "fallback"
-            },
-            {
-                "anonymous": false,
-                "inputs": [
-                    {
-                        "indexed": true,
-                        "name": "owner",
-                        "type": "address"
-                    },
-                    {
-                        "indexed": true,
-                        "name": "spender",
-                        "type": "address"
-                    },
-                    {
-                        "indexed": false,
-                        "name": "value",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "Approval",
-                "type": "event"
-            },
-            {
-                "anonymous": false,
-                "inputs": [
-                    {
-                        "indexed": true,
-                        "name": "from",
-                        "type": "address"
-                    },
-                    {
-                        "indexed": true,
-                        "name": "to",
-                        "type": "address"
-                    },
-                    {
-                        "indexed": false,
-                        "name": "value",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "Transfer",
-                "type": "event"
-            }
-        ]
+      'function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] path, address to, uint deadline) external returns (uint[] memory amounts)'
     ];
+
     const contract = new ethers.Contract(UniswapV2Router02Address, UniswapV2Router02ABI, provider);
     const swapCallData = await contract.populateTransaction.swapExactTokensForTokens(
       parseUnits(amountIn, 18),
