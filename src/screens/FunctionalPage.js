@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { providers, utils } from 'ethers'; // Updated import to directly access `providers` and `utils`
+import { providers, utils } from 'ethers';
 import Navbar from '../components/Navbar';
 import SwapComponent from '../components/SwapComponent'; // Swap feature component
 import './FunctionalPage.css';
@@ -10,21 +10,21 @@ const FunctionalPage = () => {
   const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('');
-  const [depositAddress, setDepositAddress] = useState('');
-  const [cryptoDepositStatus, setCryptoDepositStatus] = useState('');
-
+  const [fiatAmount, setFiatAmount] = useState('');
+  const [currency, setCurrency] = useState('USD'); // Source currency
+  const [targetCurrency, setTargetCurrency] = useState('ZAR'); // Target currency
+  const [userId, setUserId] = useState('user123'); // Example user ID
+  
   useEffect(() => {
     const fetchWalletDetails = async () => {
       if (window.ethereum) {
-        const provider = new providers.Web3Provider(window.ethereum); // Corrected provider
+        const provider = new providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const address = await signer.getAddress();
-
         const balance = await provider.getBalance(address);
-        setBalance(utils.formatEther(balance)); // Corrected formatEther import
+        setBalance(utils.formatEther(balance));
       }
     };
-
     fetchWalletDetails();
   }, []);
 
@@ -35,30 +35,63 @@ const FunctionalPage = () => {
     }
 
     try {
-      const provider = new providers.Web3Provider(window.ethereum); // Corrected provider
+      const provider = new providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-
       const tx = await signer.sendTransaction({
         to: recipientAddress,
-        value: utils.parseEther(amount), // Corrected parseEther import
+        value: utils.parseEther(amount),
       });
 
       setStatus(`Transaction successful! TX Hash: ${tx.hash}`);
-
       const address = await signer.getAddress();
       const balance = await provider.getBalance(address);
-      setBalance(utils.formatEther(balance)); // Corrected formatEther import
+      setBalance(utils.formatEther(balance));
     } catch (error) {
       console.error('Transaction failed:', error);
       setStatus('Transaction failed. Please try again.');
     }
   };
 
-  const generateDepositAddress = () => {
-    const address = '0x' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    setDepositAddress(address);
-    setCryptoDepositStatus('Simulated deposit address generated successfully!');
-  };
+  const remitFiat = async () => {
+    if (!fiatAmount || !recipientAddress || !currency || !targetCurrency) {
+      setStatus('Please provide all remittance details.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/remit-fiat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: fiatAmount,
+          recipientPublicKey: recipientAddress, // Use recipientAddress as public key
+          currency,
+          targetCurrency,
+          userId, // Send user ID to the backend for Stellar key retrieval
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // Log the details to the console
+        console.log('Sender account key:', data.senderPublicKey);
+        console.log('Amount sent:', data.amountSent);
+        console.log('Currency:', data.currency);
+        console.log('Receiver account key:', data.recipientPublicKey);
+        console.log('Amount received:', data.amountReceived);
+        console.log('Transaction hash:', data.transactionHash);
+        console.log('Transaction Successful!');
+        
+        setStatus(`Remittance successful! Transaction ID: ${data.transactionHash}`);
+      } else {
+        setStatus('Remittance failed.');
+      }
+    } catch (error) {
+      console.error('Remittance failed:', error);
+      setStatus('Remittance failed.');
+    }
+};
+
 
   return (
     <div className="functional-page-container">
@@ -67,13 +100,13 @@ const FunctionalPage = () => {
         <h1>Your Dashboard</h1>
       </header>
 
-      {/* Wallet Balance */}
+      {/* Wallet Balance */} 
       <section className="wallet-overview small-card neumorphism-effect">
         <h2>Wallet Balance</h2>
         <p className="balance">{balance} ETH</p>
       </section>
 
-      {/* Send Money */}
+      {/* Send ETH Section */}
       <section className="send-money-section glass-effect">
         <h2>Send Money</h2>
         <div className="send-money-form">
@@ -96,49 +129,42 @@ const FunctionalPage = () => {
         <p className="status-message">{status}</p>
       </section>
 
+      {/* Fiat Remittance Section */}
+      <section className="fiat-remittance-section glass-effect">
+        <h2>Remit Fiat</h2>
+        <div className="fiat-remittance-form">
+          <input
+            type="text"
+            placeholder="Amount (Fiat)"
+            value={fiatAmount}
+            onChange={(e) => setFiatAmount(e.target.value)}
+            className="form-input"
+          />
+          
+          {/* Source Currency */}
+          <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="form-select">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="ZAR">ZAR</option>
+            <option value="NGN">NGN</option>
+          </select>
+
+          {/* Target Currency */}
+          <select value={targetCurrency} onChange={(e) => setTargetCurrency(e.target.value)} className="form-select">
+            <option value="ZAR">ZAR</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="NGN">NGN</option>
+          </select>
+
+          <button onClick={remitFiat} className="cta-button">Remit Fiat</button>
+        </div>
+        <p className="status-message">{status}</p>
+      </section>
+
       {/* Swap Feature */}
       <section className="swap-feature glass-effect">
         <SwapComponent />
-      </section>
-
-      {/* Deposit Section */}
-      <section className="deposit-section">
-        <h2>Deposit Funds</h2>
-        <div className="deposit-grid">
-          <div className="deposit-option neumorphism-effect">
-            <h3>Deposit with Crypto</h3>
-            <button onClick={generateDepositAddress} className="cta-button">Get Deposit Address</button>
-            {depositAddress && <p>Your deposit address: <span>{depositAddress}</span></p>}
-            <p className="status-message">{cryptoDepositStatus}</p>
-          </div>
-
-          <div className="deposit-option neumorphism-effect">
-            <h3>Deposit with Fiat</h3>
-            <p>Coming Soon!</p>
-          </div>
-
-          <div className="deposit-option neumorphism-effect">
-            <h3>Deposit with Debit/Credit Card</h3>
-            <p>Coming soon!</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Transaction History */}
-      <section className="transaction-history-section">
-        <h2>Transaction History</h2>
-        {transactions.length > 0 ? (
-          <ul className="transaction-list">
-            {transactions.map((tx, index) => (
-              <li key={index} className="transaction-item glass-effect">
-                <p>TX Hash: {tx.hash}</p>
-                <p>Amount: {utils.formatEther(tx.value)} ETH</p> {/* Corrected formatEther usage */}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No recent transactions.</p>
-        )}
       </section>
     </div>
   );
