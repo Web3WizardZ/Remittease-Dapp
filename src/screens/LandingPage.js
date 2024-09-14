@@ -10,6 +10,9 @@ import { faFacebook, faTwitter, faInstagram } from '@fortawesome/free-brands-svg
 const LandingPage = () => {
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [joinWaitlist, setJoinWaitlist] = useState(false); // Waitlist toggle
   const navigate = useNavigate();
 
   const connectWallet = async () => {
@@ -34,6 +37,17 @@ const LandingPage = () => {
     }
   };
 
+  const handleSignUp = (e) => {
+    e.preventDefault();
+    // Handle email/password sign-up logic
+    console.log('Email:', email);
+    console.log('Password:', password);
+    console.log('Join waitlist:', joinWaitlist);
+
+    // Navigate or process after sign-up
+    navigate('/functional-page'); // Replace with your actual functional page route
+  };
+
   return (
     <div className="landing-container">
       <video autoPlay muted loop className="video-background">
@@ -48,12 +62,42 @@ const LandingPage = () => {
         <h1>RemittEase</h1>
         <p>Fast, Secure, and Affordable Cross-Border Transfers</p>
 
-        {/* Get Started Button as Wallet Connection Button */}
+        {/* Wallet Connection */}
         <button className="cta-button" onClick={connectWallet}>
-          {walletConnected ? `Connected: ${walletAddress.slice(0, 6)}...` : 'Get Started'}
+          {walletConnected ? `Connected: ${walletAddress.slice(0, 6)}...` : 'Get Started with Wallet'}
         </button>
+
+        {/* Email/Password Sign-Up */}
+        <form className="signup-form" onSubmit={handleSignUp}>
+          <h3>Or Sign Up with Email</h3>
+          <input 
+            type="email" 
+            placeholder="Email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            className="form-input" 
+            required 
+          />
+          <input 
+            type="password" 
+            placeholder="Password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            className="form-input" 
+            required 
+          />
+          <div className="waitlist-checkbox">
+            <input 
+              type="checkbox" 
+              checked={joinWaitlist} 
+              onChange={() => setJoinWaitlist(!joinWaitlist)} 
+            />
+            <label>Join our waitlist</label>
+          </div>
+          <button type="submit" className="cta-button">Sign Up</button>
+        </form>
       </header>
-      
+
       {/* Features Section */}
       <section className="features-section" id="features">
         <h2>Features</h2>
@@ -75,7 +119,7 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-      
+
       {/* How It Works Section */}
       <section className="how-it-works-section" id="how-it-works">
         <h2>How It Works</h2>

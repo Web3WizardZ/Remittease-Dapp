@@ -12,12 +12,12 @@ body {
 .functional-page-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 80px 20px 20px; /* Added top padding to offset the fixed navbar height */
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   animation: fadeInUp 0.8s ease;
-}
+}t
 
 .functional-header {
   text-align: center;
@@ -68,7 +68,9 @@ body {
 }
 
 /* Send Money Section */
-.send-money-section {
+.send-money-section,
+.fiat-remittance-section,
+.transaction-history-section {
   padding: 20px;
   margin-bottom: 30px;
   background: rgba(240, 248, 255, 0.8);
@@ -76,14 +78,17 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.send-money-section h2 {
+.send-money-section h2,
+.fiat-remittance-section h2,
+.transaction-history-section h2 {
   font-size: 1.6rem;
   color: #2c3e50;
   text-align: center;
   margin-bottom: 15px;
 }
 
-.send-money-form {
+.send-money-form,
+.fiat-remittance-form {
   display: grid;
   gap: 15px;
 }
@@ -132,30 +137,51 @@ body {
   text-align: center;
 }
 
-/* Fiat Remittance Section */
-.fiat-remittance-section {
-  padding: 20px;
-  margin-bottom: 30px;
-  background: rgba(240, 248, 255, 0.8);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+/* Transaction History Section */
+.transaction-history {
+  padding: 10px;
 }
 
-.fiat-remittance-section h2 {
-  font-size: 1.6rem;
-  color: #2c3e50;
-  text-align: center;
-  margin-bottom: 15px;
+.transaction-list {
+  list-style: none;
+  padding: 0;
 }
 
-.fiat-remittance-form {
-  display: grid;
-  gap: 15px;
+.transaction-item {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.transaction-item p {
+  margin: 5px 0;
+}
+
+.transaction-item a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.transaction-item a:hover {
+  text-decoration: underline;
 }
 
 /* SwapComponent Styles */
 .swap-feature {
   margin-bottom: 30px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .functional-page-container {
+    padding: 10px;
+  }
+
+  .cta-button {
+    width: 100%;
+  }
 }
 
 /* Keyframe Animation */

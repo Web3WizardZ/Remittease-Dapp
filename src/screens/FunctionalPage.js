@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { providers, utils } from 'ethers';
+import axios from 'axios';
 import Navbar from '../components/Navbar';
-import SwapComponent from '../components/SwapComponent'; // Swap feature component
+import SwapComponent from '../components/SwapComponent';
+import TransactionHistory from '../components/TransactionHistory'; // New Component
 import './FunctionalPage.css';
 
 const FunctionalPage = () => {
   const [balance, setBalance] = useState('');
+  const [address, setAddress] = useState('');
   const [ethRecipientAddress, setEthRecipientAddress] = useState('');
   const [fiatRecipientPublicKey, setFiatRecipientPublicKey] = useState('');
   const [amount, setAmount] = useState('');
   const [fiatAmount, setFiatAmount] = useState('');
-  const [currency, setCurrency] = useState('USD'); // Source currency
-  const [targetCurrency, setTargetCurrency] = useState('ZAR'); // Target currency
-  const [userId, setUserId] = useState('user123'); // Example user ID
+  const [currency, setCurrency] = useState('USD');
+  const [targetCurrency, setTargetCurrency] = useState('ZAR');
+  const [userId, setUserId] = useState('user123');
 
   const [sendMoneyStatus, setSendMoneyStatus] = useState('');
   const [remitFiatStatus, setRemitFiatStatus] = useState('');
   const [isSendingMoney, setIsSendingMoney] = useState(false);
   const [isRemittingFiat, setIsRemittingFiat] = useState(false);
+
+  const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     const fetchWalletDetails = async () => {
@@ -25,8 +30,9 @@ const FunctionalPage = () => {
         try {
           const provider = new providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
-          const address = await signer.getAddress();
-          const balance = await provider.getBalance(address);
+          const userAddress = await signer.getAddress();
+          setAddress(userAddress);
+          const balance = await provider.getBalance(userAddress);
           setBalance(utils.formatEther(balance));
         } catch (error) {
           console.error('Error fetching wallet details:', error);
@@ -37,8 +43,31 @@ const FunctionalPage = () => {
         setBalance('N/A');
       }
     };
+
     fetchWalletDetails();
   }, []);
+
+  useEffect(() => {
+    const fetchTransactionHistory = async () => {
+      if (address) {
+        try {
+          const apiKey = 'YourEtherscanAPIKey'; // Replace with your Etherscan API Key
+          const response = await axios.get(
+            `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&sort=desc&apikey=${apiKey}`
+          );
+          if (response.data.status === '1') {
+            setTransactions(response.data.result.slice(0, 10)); // Get the latest 10 transactions
+          } else {
+            console.error('Error fetching transactions:', response.data.message);
+          }
+        } catch (error) {
+          console.error('Error fetching transaction history:', error);
+        }
+      }
+    };
+
+    fetchTransactionHistory();
+  }, [address]);
 
   const sendMoney = async () => {
     if (!ethRecipientAddress || !amount) {
@@ -69,13 +98,16 @@ const FunctionalPage = () => {
       await tx.wait();
 
       setSendMoneyStatus(`Transaction successful! TX Hash: ${tx.hash}`);
-      const address = await signer.getAddress();
-      const balance = await provider.getBalance(address);
+      const userAddress = await signer.getAddress();
+      const balance = await provider.getBalance(userAddress);
       setBalance(utils.formatEther(balance));
 
       // Clear input fields
       setEthRecipientAddress('');
       setAmount('');
+
+      // Refresh transaction history
+      setAddress(userAddress);
     } catch (error) {
       console.error('Transaction failed:', error);
       setSendMoneyStatus('Transaction failed. Please try again.');
@@ -113,14 +145,7 @@ const FunctionalPage = () => {
 
       const data = await response.json();
       if (response.ok) {
-        // Log the details to the console
-        console.log('Sender account key:', data.senderPublicKey);
-        console.log('Amount sent:', data.amountSent);
-        console.log('Currency:', data.currency);
-        console.log('Receiver account key:', data.recipientPublicKey);
-        console.log('Amount received:', data.amountReceived);
-        console.log('Transaction hash:', data.transactionHash);
-        console.log('Transaction Successful!');
+        console.log('Remittance details:', data);
 
         setRemitFiatStatus(
           `Remittance successful! Transaction ID: ${data.transactionHash}`
@@ -234,6 +259,12 @@ const FunctionalPage = () => {
           </button>
         </div>
         <p className="status-message">{remitFiatStatus}</p>
+      </section>
+
+      {/* Transaction History Section */}
+      <section className="transaction-history-section glass-effect">
+        <h2>Transaction History</h2>
+        <TransactionHistory transactions={transactions} address={address} />
       </section>
 
       {/* Swap Feature */}

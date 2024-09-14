@@ -14,9 +14,9 @@ body {
   
   .video-background {
     position: absolute;
-    top: -500;
+    top: -1000;
     left: 0;
-    height: 30%; /* Adjusted to cover 60% of the screen */
+    height: 50%; /* Adjusted to cover 60% of the screen */
     width: 100%;
     object-fit: cover;
     z-index: -1;

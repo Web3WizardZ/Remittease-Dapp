@@ -1,0 +1,32 @@
+/* TransactionHistory.css */
+
+.transaction-history {
+    padding: 10px;
+  }
+  
+  .transaction-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .transaction-item {
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .transaction-item p {
+    margin: 5px 0;
+  }
+  
+  .transaction-item a {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  .transaction-item a:hover {
+    text-decoration: underline;
+  }
+  
