@@ -6,68 +6,108 @@ import './FunctionalPage.css';
 
 const FunctionalPage = () => {
   const [balance, setBalance] = useState('');
-  const [transactions, setTransactions] = useState([]);
-  const [recipientAddress, setRecipientAddress] = useState('');
+  const [ethRecipientAddress, setEthRecipientAddress] = useState('');
+  const [fiatRecipientPublicKey, setFiatRecipientPublicKey] = useState('');
   const [amount, setAmount] = useState('');
-  const [status, setStatus] = useState('');
   const [fiatAmount, setFiatAmount] = useState('');
   const [currency, setCurrency] = useState('USD'); // Source currency
   const [targetCurrency, setTargetCurrency] = useState('ZAR'); // Target currency
   const [userId, setUserId] = useState('user123'); // Example user ID
-  
+
+  const [sendMoneyStatus, setSendMoneyStatus] = useState('');
+  const [remitFiatStatus, setRemitFiatStatus] = useState('');
+  const [isSendingMoney, setIsSendingMoney] = useState(false);
+  const [isRemittingFiat, setIsRemittingFiat] = useState(false);
+
   useEffect(() => {
     const fetchWalletDetails = async () => {
       if (window.ethereum) {
-        const provider = new providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-        const balance = await provider.getBalance(address);
-        setBalance(utils.formatEther(balance));
+        try {
+          const provider = new providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const address = await signer.getAddress();
+          const balance = await provider.getBalance(address);
+          setBalance(utils.formatEther(balance));
+        } catch (error) {
+          console.error('Error fetching wallet details:', error);
+          setBalance('N/A');
+        }
+      } else {
+        console.warn('window.ethereum is not available');
+        setBalance('N/A');
       }
     };
     fetchWalletDetails();
   }, []);
 
   const sendMoney = async () => {
-    if (!recipientAddress || !amount) {
-      setStatus('Please enter a valid address and amount.');
+    if (!ethRecipientAddress || !amount) {
+      setSendMoneyStatus('Please enter a valid address and amount.');
+      return;
+    }
+
+    if (!utils.isAddress(ethRecipientAddress)) {
+      setSendMoneyStatus('Please enter a valid Ethereum address.');
+      return;
+    }
+
+    if (isNaN(amount) || parseFloat(amount) <= 0) {
+      setSendMoneyStatus('Please enter a valid amount.');
       return;
     }
 
     try {
+      setIsSendingMoney(true);
+      setSendMoneyStatus('Transaction pending...');
       const provider = new providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const tx = await signer.sendTransaction({
-        to: recipientAddress,
+        to: ethRecipientAddress,
         value: utils.parseEther(amount),
       });
 
-      setStatus(`Transaction successful! TX Hash: ${tx.hash}`);
+      await tx.wait();
+
+      setSendMoneyStatus(`Transaction successful! TX Hash: ${tx.hash}`);
       const address = await signer.getAddress();
       const balance = await provider.getBalance(address);
       setBalance(utils.formatEther(balance));
+
+      // Clear input fields
+      setEthRecipientAddress('');
+      setAmount('');
     } catch (error) {
       console.error('Transaction failed:', error);
-      setStatus('Transaction failed. Please try again.');
+      setSendMoneyStatus('Transaction failed. Please try again.');
+    } finally {
+      setIsSendingMoney(false);
     }
   };
 
   const remitFiat = async () => {
-    if (!fiatAmount || !recipientAddress || !currency || !targetCurrency) {
-      setStatus('Please provide all remittance details.');
+    if (!fiatAmount || !fiatRecipientPublicKey || !currency || !targetCurrency) {
+      setRemitFiatStatus('Please provide all remittance details.');
+      return;
+    }
+
+    if (isNaN(fiatAmount) || parseFloat(fiatAmount) <= 0) {
+      setRemitFiatStatus('Please enter a valid fiat amount.');
       return;
     }
 
     try {
+      setIsRemittingFiat(true);
+      setRemitFiatStatus('Remittance in progress...');
+
       const response = await fetch('http://localhost:3000/remit-fiat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: fiatAmount,
-          recipientPublicKey: recipientAddress, // Use recipientAddress as public key
+          recipientPublicKey: fiatRecipientPublicKey,
           currency,
           targetCurrency,
-          userId, // Send user ID to the backend for Stellar key retrieval
+          userId,
         }),
       });
 
@@ -81,17 +121,24 @@ const FunctionalPage = () => {
         console.log('Amount received:', data.amountReceived);
         console.log('Transaction hash:', data.transactionHash);
         console.log('Transaction Successful!');
-        
-        setStatus(`Remittance successful! Transaction ID: ${data.transactionHash}`);
+
+        setRemitFiatStatus(
+          `Remittance successful! Transaction ID: ${data.transactionHash}`
+        );
+
+        // Clear input fields
+        setFiatAmount('');
+        setFiatRecipientPublicKey('');
       } else {
-        setStatus('Remittance failed.');
+        setRemitFiatStatus(`Remittance failed: ${data.message || 'Unknown error.'}`);
       }
     } catch (error) {
       console.error('Remittance failed:', error);
-      setStatus('Remittance failed.');
+      setRemitFiatStatus('Remittance failed. Please try again.');
+    } finally {
+      setIsRemittingFiat(false);
     }
-};
-
+  };
 
   return (
     <div className="functional-page-container">
@@ -100,7 +147,7 @@ const FunctionalPage = () => {
         <h1>Your Dashboard</h1>
       </header>
 
-      {/* Wallet Balance */} 
+      {/* Wallet Balance */}
       <section className="wallet-overview small-card neumorphism-effect">
         <h2>Wallet Balance</h2>
         <p className="balance">{balance} ETH</p>
@@ -113,8 +160,8 @@ const FunctionalPage = () => {
           <input
             type="text"
             placeholder="Recipient Address"
-            value={recipientAddress}
-            onChange={(e) => setRecipientAddress(e.target.value)}
+            value={ethRecipientAddress}
+            onChange={(e) => setEthRecipientAddress(e.target.value)}
             className="form-input"
           />
           <input
@@ -124,9 +171,15 @@ const FunctionalPage = () => {
             onChange={(e) => setAmount(e.target.value)}
             className="form-input"
           />
-          <button onClick={sendMoney} className="cta-button">Send</button>
+          <button
+            onClick={sendMoney}
+            className="cta-button"
+            disabled={isSendingMoney}
+          >
+            {isSendingMoney ? 'Sending...' : 'Send'}
+          </button>
         </div>
-        <p className="status-message">{status}</p>
+        <p className="status-message">{sendMoneyStatus}</p>
       </section>
 
       {/* Fiat Remittance Section */}
@@ -140,9 +193,20 @@ const FunctionalPage = () => {
             onChange={(e) => setFiatAmount(e.target.value)}
             className="form-input"
           />
-          
+          <input
+            type="text"
+            placeholder="Recipient Public Key"
+            value={fiatRecipientPublicKey}
+            onChange={(e) => setFiatRecipientPublicKey(e.target.value)}
+            className="form-input"
+          />
+
           {/* Source Currency */}
-          <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="form-select">
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="form-select"
+          >
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
             <option value="ZAR">ZAR</option>
@@ -150,16 +214,26 @@ const FunctionalPage = () => {
           </select>
 
           {/* Target Currency */}
-          <select value={targetCurrency} onChange={(e) => setTargetCurrency(e.target.value)} className="form-select">
+          <select
+            value={targetCurrency}
+            onChange={(e) => setTargetCurrency(e.target.value)}
+            className="form-select"
+          >
             <option value="ZAR">ZAR</option>
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
             <option value="NGN">NGN</option>
           </select>
 
-          <button onClick={remitFiat} className="cta-button">Remit Fiat</button>
+          <button
+            onClick={remitFiat}
+            className="cta-button"
+            disabled={isRemittingFiat}
+          >
+            {isRemittingFiat ? 'Remitting...' : 'Remit Fiat'}
+          </button>
         </div>
-        <p className="status-message">{status}</p>
+        <p className="status-message">{remitFiatStatus}</p>
       </section>
 
       {/* Swap Feature */}

@@ -1,17 +1,23 @@
-import StellarSdk from 'stellar-sdk'; // Import the SDK
-import fetch from 'node-fetch'; // Remove if using Node.js 18+
+import StellarSdk from 'stellar-sdk';
+// Remove the following line if you're using Node.js 18 or newer
+// import fetch from 'node-fetch';
 
-const { Keypair, TransactionBuilder, Networks, StellarTomlResolver } = StellarSdk;
+const { Keypair, Transaction, Networks, StellarTomlResolver } = StellarSdk;
+const NETWORK_PASSPHRASE = Networks.TESTNET; // Change to Networks.PUBLIC if using the public network
 
 // Function to create a Stellar account and fund it using Friendbot
 export const createStellarAccount = async () => {
   const pair = Keypair.random();  // Create a new key pair
   console.log('Public Key:', pair.publicKey());
-  console.log('Secret Key:', pair.secret());
+  // Avoid logging the secret key in production
+  // console.log('Secret Key:', pair.secret());
 
   try {
     // Use Friendbot to fund the testnet account
     const response = await fetch(`https://friendbot.stellar.org?addr=${pair.publicKey()}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const responseJSON = await response.json();
     console.log('Account funded:', responseJSON);
     
@@ -31,10 +37,13 @@ export const authenticateWithAnchor = async (homeDomain, publicKey, secretKey) =
   const webAuthEndpoint = toml.WEB_AUTH_ENDPOINT;
 
   const challengeResponse = await fetch(`${webAuthEndpoint}?account=${publicKey}`);
+  if (!challengeResponse.ok) {
+    throw new Error(`Failed to fetch challenge: ${challengeResponse.status}`);
+  }
   const challengeJson = await challengeResponse.json();
 
   const keypair = Keypair.fromSecret(secretKey);
-  const transaction = new TransactionBuilder.fromXDR(challengeJson.transaction, Networks.TESTNET);
+  const transaction = new Transaction(challengeJson.transaction, NETWORK_PASSPHRASE);
   transaction.sign(keypair);
 
   const tokenResponse = await fetch(webAuthEndpoint, {
@@ -43,13 +52,25 @@ export const authenticateWithAnchor = async (homeDomain, publicKey, secretKey) =
     body: JSON.stringify({ transaction: transaction.toEnvelope().toXDR('base64') }),
   });
 
+  if (!tokenResponse.ok) {
+    throw new Error(`Failed to fetch token: ${tokenResponse.status}`);
+  }
+
   const tokenJson = await tokenResponse.json();
   return tokenJson.token;
 };
 
-// Initiate a cross-border payment (SEP-0031)
-export const initiateCrossBorderPayment = async (sendingAnchorDomain, jwtToken, amount, assetCode, assetIssuer, senderId, receiverId) => {
-  const toml = await StellarTomlResolver.resolve(sendingAnchorDomain);
+// Initiate a cross-border payment (SEP-31)
+export const initiateCrossBorderPayment = async (
+  homeDomain,
+  jwtToken,
+  amount,
+  assetCode,
+  assetIssuer,
+  senderId,
+  receiverId
+) => {
+  const toml = await StellarTomlResolver.resolve(homeDomain);
   const transferServer = toml.DIRECT_PAYMENT_SERVER;
 
   const transactionRequest = {
@@ -69,49 +90,53 @@ export const initiateCrossBorderPayment = async (sendingAnchorDomain, jwtToken, 
     body: JSON.stringify(transactionRequest),
   });
 
+  if (!response.ok) {
+    throw new Error(`Failed to initiate payment: ${response.status}`);
+  }
+
   const result = await response.json();
   return result;
 };
 
 // SEP-12: Register or Update Customer Information
-export const registerCustomer = async (sendingAnchorDomain, jwtToken, customerInfo) => {
-    try {
-      const toml = await StellarTomlResolver.resolve(sendingAnchorDomain);
-      if (!toml) {
-        throw new Error('Failed to resolve TOML for the sending anchor domain');
-      }
-      const kycServer = toml.KYC_SERVER;
-      if (!kycServer) {
-        throw new Error('KYC_SERVER not found in the TOML file');
-      }
-  
-      const response = await fetch(`${kycServer}/customer`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`,
-        },
-        body: JSON.stringify(customerInfo),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      const result = await response.json();
-      if (!result.id) {
-        throw new Error('Customer ID not returned from the server');
-      }
-      return result.id;
-    } catch (error) {
-      console.error('Error in registerCustomer:', error);
-      throw error;
+export const registerCustomer = async (homeDomain, jwtToken, customerInfo) => {
+  try {
+    const toml = await StellarTomlResolver.resolve(homeDomain);
+    if (!toml) {
+      throw new Error('Failed to resolve TOML for the anchor domain');
     }
-  };
+    const kycServer = toml.KYC_SERVER;
+    if (!kycServer) {
+      throw new Error('KYC_SERVER not found in the TOML file');
+    }
+
+    const response = await fetch(`${kycServer}/customer`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwtToken}`,
+      },
+      body: JSON.stringify(customerInfo),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (!result.id) {
+      throw new Error('Customer ID not returned from the server');
+    }
+    return result.id;
+  } catch (error) {
+    console.error('Error in registerCustomer:', error);
+    throw error;
+  }
+};
 
 // SEP-12: Fetch Customer Information
-export const getCustomerStatus = async (sendingAnchorDomain, jwtToken, customerId) => {
-  const toml = await StellarTomlResolver.resolve(sendingAnchorDomain);
+export const getCustomerStatus = async (homeDomain, jwtToken, customerId) => {
+  const toml = await StellarTomlResolver.resolve(homeDomain);
   const kycServer = toml.KYC_SERVER;
 
   const response = await fetch(`${kycServer}/customer?id=${customerId}`, {
@@ -121,13 +146,17 @@ export const getCustomerStatus = async (sendingAnchorDomain, jwtToken, customerI
     },
   });
 
+  if (!response.ok) {
+    throw new Error(`Failed to get customer status: ${response.status}`);
+  }
+
   const result = await response.json();
   return result.status;
 };
 
 // SEP-38: Request a quote for asset conversion
-export const requestQuote = async (sendingAnchorDomain, jwtToken, sellAsset, buyAsset, sellAmount) => {
-  const toml = await StellarTomlResolver.resolve(sendingAnchorDomain);
+export const requestQuote = async (homeDomain, jwtToken, sellAsset, buyAsset, sellAmount) => {
+  const toml = await StellarTomlResolver.resolve(homeDomain);
   const quoteServer = toml.ANCHOR_QUOTE_SERVER;
 
   const quoteRequest = {
@@ -144,6 +173,10 @@ export const requestQuote = async (sendingAnchorDomain, jwtToken, sellAsset, buy
     },
     body: JSON.stringify(quoteRequest),
   });
+
+  if (!response.ok) {
+    throw new Error(`Failed to request quote: ${response.status}`);
+  }
 
   const result = await response.json();
   return result;

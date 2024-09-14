@@ -88,7 +88,8 @@ body {
   gap: 15px;
 }
 
-.form-input {
+.form-input,
+.form-select {
   padding: 12px;
   border-radius: 8px;
   border: 2px solid #3498db;
@@ -97,7 +98,8 @@ body {
   transition: border-color 0.3s ease;
 }
 
-.form-input:focus {
+.form-input:focus,
+.form-select:focus {
   border-color: #2980b9;
 }
 
@@ -117,6 +119,12 @@ body {
   transform: scale(1.05);
 }
 
+.cta-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .status-message {
   margin-top: 8px;
   color: #e74c3c;
@@ -124,110 +132,30 @@ body {
   text-align: center;
 }
 
-/* Deposit Section */
-.deposit-section {
-  margin-bottom: 30px;
+/* Fiat Remittance Section */
+.fiat-remittance-section {
   padding: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+  background: rgba(240, 248, 255, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.deposit-section h2 {
+.fiat-remittance-section h2 {
   font-size: 1.6rem;
-  margin-bottom: 15px;
-  text-align: center;
   color: #2c3e50;
+  text-align: center;
+  margin-bottom: 15px;
 }
 
-.deposit-grid {
+.fiat-remittance-form {
   display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-/* Transaction History Section */
-.transaction-history-section {
-  margin-bottom: 30px;
-  padding: 20px;
-  border-radius: 10px;
-  background: #fafafa;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-.transaction-history-section h2 {
-  font-size: 1.6rem;
-  margin-bottom: 15px;
-  text-align: center;
-  color: #2c3e50;
-}
-
-.transaction-list {
-  list-style: none;
-  padding: 0;
-}
-
-.transaction-item {
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.transaction-item p {
-  margin: 0;
+  gap: 15px;
 }
 
 /* SwapComponent Styles */
-.swap-container {
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.swap-container h2 {
-  font-size: 1.6rem;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.swap-container input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: 2px solid #3498db;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.swap-container input:focus {
-  border-color: #2980b9;
-}
-
-.swap-container button {
-  padding: 12px 20px;
-  background-color: #3498db;
-  color: white;
-  font-size: 1rem;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.swap-container button:hover {
-  background-color: #2980b9;
-  transform: scale(1.05);
-}
-
-.swap-container p {
-  margin-top: 10px;
-  color: #e74c3c;
-  font-weight: bold;
+.swap-feature {
+  margin-bottom: 30px;
 }
 
 /* Keyframe Animation */

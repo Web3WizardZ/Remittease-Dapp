@@ -3,7 +3,7 @@ import {
   createStellarAccount,
   authenticateWithAnchor,
   initiateCrossBorderPayment,
-  registerCustomer,  // Only import this function
+  registerCustomer,
   getCustomerStatus,
   requestQuote
 } from './remittanceProcessor.mjs';
@@ -31,7 +31,15 @@ app.post('/remit-fiat', async (req, res) => {
     const jwtToken = await authenticateWithAnchor(homeDomain, senderPublicKey, senderSecret);
 
     // Step 2: Initiate the payment
-    const paymentResult = await initiateCrossBorderPayment(homeDomain, jwtToken, amount, assetCode, assetIssuer, senderId, receiverId);
+    const paymentResult = await initiateCrossBorderPayment(
+      homeDomain,
+      jwtToken,
+      amount,
+      assetCode,
+      assetIssuer,
+      senderId,
+      receiverId
+    );
     
     res.json({ paymentResult });
   } catch (error) {
